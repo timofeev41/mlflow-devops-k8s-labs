@@ -1,0 +1,42 @@
+expose:
+  type: ingress
+  tls:
+    enabled: true
+    certSource: secret
+    secret:
+      secretName: k8s-labs-itmo-loc-tls
+  ingress:
+    hosts:
+      core: harbor.k8s.labs.itmo.loc
+    controller: default
+    className: ""
+    annotations:
+      ingress.kubernetes.io/ssl-redirect: "true"
+      ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+
+externalURL: https://harbor.k8s.labs.itmo.loc
+
+harborAdminPassword: "admin"
+
+persistence:
+  enabled: true
+  resourcePolicy: "keep"
+  persistentVolumeClaim:
+    registry:
+      storageClass: microk8s-hostpath
+      accessMode: ReadWriteOnce
+      size: 5Gi
+    database:
+      storageClass: microk8s-hostpath
+      accessMode: ReadWriteOnce
+      size: 2Gi
+    redis:
+      storageClass: microk8s-hostpath
+      accessMode: ReadWriteOnce
+      size: 1Gi
+    trivy:
+      storageClass: microk8s-hostpath
+      accessMode: ReadWriteOnce
+      size: 2Gi

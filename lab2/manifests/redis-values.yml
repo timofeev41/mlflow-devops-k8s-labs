@@ -1,0 +1,34 @@
+global:
+  storageClass: microk8s-hostpath
+
+auth:
+  enabled: false
+
+architecture: standalone
+
+master:
+  persistence:
+    enabled: true
+    storageClass: microk8s-hostpath
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+
+replica:
+  replicaCount: 0 
+  persistence:
+    enabled: false
+
+service:
+  type: ClusterIP
+  port: 6379
+
+metrics:
+  enabled: false

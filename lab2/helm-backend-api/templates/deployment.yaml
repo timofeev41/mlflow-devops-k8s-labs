@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "helm-web-app.fullname" . }}
+  labels:
+    app: {{ include "helm-web-app.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "helm-web-app.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "helm-web-app.name" . }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: {{ include "helm-web-app.fullname" . }}-config
+          env:
+            - name: REDIS_HOST
+              value: {{ .Values.env.REDIS_HOST | quote }}
+            - name: MILVUS_HOST
+              value: {{ .Values.env.MILVUS_HOST | quote }}
+            - name: MILVUS_PORT
+              value: {{ .Values.env.MILVUS_PORT | quote }}

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI + Redis + Milvus Demo</title>
+
+    <style>
+        :root {
+            --bg: #0d1117;
+            --bg-light: rgba(255, 255, 255, 0.05);
+            --card: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.15);
+            --text: #e6edf3;
+            --accent: #6ea8fe;
+            --accent-hover: #9ec5fe;
+            --error-bg: rgba(255, 0, 0, 0.15);
+            --success-bg: rgba(0, 255, 120, 0.15);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Inter", sans-serif;
+            margin: 0;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 900px;
+            max-width: 95%;
+        }
+
+        h1, h2, h3 {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        a:hover {
+            color: var(--accent-hover);
+        }
+
+        .card {
+            background: var(--card);
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 15px;
+        }
+
+        input::placeholder {
+            color: #aaa;
+        }
+
+        button {
+            background: var(--accent);
+            color: #000;
+            padding: 12px 18px;
+            border: none;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+        }
+
+        .nav-links {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .message {
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .success {
+            background: var(--success-bg);
+        }
+
+        .error {
+            background: var(--error-bg);
+        }
+
+        .result-item {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+        }
+
+        ul li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>🚀 Демо приложения</h1>
+
+    <div class="nav-links">
+        <a href="/docs">API Документация</a> |
+        <a href="/health">Health Check</a>
+    </div>
+
+    {% if message %}
+    <div class="message success">{{ message }}</div>
+    {% endif %}
+    {% if error %}
+    <div class="message error">{{ error }}</div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Добавить вектор</h2>
+        <form action="/add" method="post">
+            <div class="form-group">
+                <label for="vector_id">ID вектора:</label>
+                <input type="number" id="vector_id" name="vector_id" required>
+            </div>
+
+            <div class="form-group">
+                <label for="vector_data">Вектор (до 128 значений):</label>
+                <input type="text" id="vector_data" name="vector_data" placeholder="0.1,0.2,0.3" required>
+            </div>
+
+            <div class="form-group">
+                <label for="payload_data">Метаданные (JSON):</label>
+                <textarea id="payload_data" name="payload_data" rows="3">{"description": "test vector"}</textarea>
+            </div>
+
+            <button type="submit">Добавить</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Поиск похожих векторов</h2>
+        <form action="/search" method="post">
+            <div class="form-group">
+                <label for="query_vector">Поисковый вектор:</label>
+                <input type="text" id="query_vector" name="query_vector" placeholder="0.1,0.2,0.3" required>
+            </div>
+
+            <div class="form-group">
+                <label for="top_k">Количество результатов:</label>
+                <input type="number" id="top_k" name="top_k" value="5" min="1" max="20">
+            </div>
+
+            <button type="submit">Поиск</button>
+        </form>
+    </div>
+
+    {% if search_results %}
+    <div class="card">
+        <h3>Результаты поиска</h3>
+        <p>Вектор запроса: <strong>{{ query }}</strong></p>
+
+        {% for result in search_results %}
+        <div class="result-item">
+            <strong>ID:</strong> {{ result.id }}<br>
+            <strong>Схожесть:</strong> {{ "%.4f"|format(result.score) }}<br>
+            <strong>Метаданные:</strong> {{ result.payload }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Быстрые ссылки</h2>
+        <ul>
+            <li><a href="/vector/1">Получить вектор ID=1</a></li>
+            <li><a href="/search/1">Похожие на ID=1</a></li>
+            <li><a href="/health">Проверить сервисы</a></li>
+        </ul>
+    </div>
+
+</div>
+</body>
+</html>
