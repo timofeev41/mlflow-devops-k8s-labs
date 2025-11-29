@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
-  labels:
-    app: nginx
 spec:
   replicas: 1
   selector:
@@ -19,17 +17,3 @@ spec:
           image: nginx:latest
           ports:
             - containerPort: 80
-            - containerPort: 443
-          volumeMounts:
-            - name: nginx-config-volume
-              mountPath: /etc/nginx/conf.d
-            - name: tls-secret
-              mountPath: /etc/nginx/ssl
-              readOnly: true
-      volumes:
-        - name: nginx-config-volume
-          configMap:
-            name: nginx-config
-        - name: tls-secret
-          secret:
-            secretName: mlflow-labs-itmo-loc-tls
