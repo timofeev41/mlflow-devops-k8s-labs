@@ -1,6 +1,8 @@
 cluster:
   enabled: false
 
+msgStreamType: rocksmq  # отключает Kafkу
+
 etcd:
   enabled: true
   replicaCount: 1
@@ -16,6 +18,9 @@ minio:
     enabled: true
     storageClass: microk8s-hostpath
     size: 512Mi
+
+kafka:
+  enabled: false
 
 pulsarv3:
   enabled: false
