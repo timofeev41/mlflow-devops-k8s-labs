@@ -1,0 +1,19 @@
+[Unit]
+Description=MLflow Tracking Server
+After=network.target
+
+[Service]
+Environment=MLFLOW_ENABLE_MIDDLEWARE_SECURITY=false
+ExecStart=/root/mlflow-env/bin/mlflow server \
+  --backend-store-uri sqlite:////var/lib/mlflow/db/mlflow.db \
+  --default-artifact-root file:///var/lib/mlflow/artifacts \
+  --host 0.0.0.0 \
+  --port 5000 \
+  --allowed-hosts mlflow.labs.itmo.loc,10.114.0.4,10.114.0.3,localhost,127.0.0.1 \
+  --cors-allowed-origins http://mlflow.labs.itmo.loc,http://10.114.0.4,http://10.114.0.3
+WorkingDirectory=/root
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
